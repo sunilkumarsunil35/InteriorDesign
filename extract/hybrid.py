@@ -17,7 +17,7 @@ import urllib.request
 import cv2
 import numpy as np
 
-from geometry import Plan, debug_image, wall_runs
+from geometry import Plan, debug_image, find_arrows, thin_runs, wall_runs
 
 OUTDOOR = {"balcony", "sitout", "utility", "terrace"}
 STRONG = 0.5  # boundary coverage that a room rectangle may not cross
@@ -219,13 +219,21 @@ def build(bgr, found, furniture_found=None, namer=None):
     p = Plan(bgr)
     H, W = p.H, p.W
 
-    labels = []
+    typed = []
     for lb in found["labels"]:
         t = room_type(lb["text"])
         if not t:
             continue
         x1, y1, x2, y2 = to_px(lb["bbox_2d"], W, H)
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+        if not (p.xs[0] <= cx <= p.xs[-1] and p.ys[0] <= cy <= p.ys[-1]):
+            print(f"[geometry] skipping '{lb['text']}': outside the detected walls (cut off?)", file=sys.stderr)
+            continue
+        typed.append((lb, t, cx, cy))
+    p.claim_inside([(cx, cy) for _, _, cx, cy in typed])
+
+    labels = []
+    for lb, t, cx, cy in typed:
         cell = nearest_inside(p, cx, cy)
         if cell is None:
             continue
@@ -265,6 +273,12 @@ def build(bgr, found, furniture_found=None, namer=None):
         taken[i0:i1 + 1, j0:j1 + 1] = True
         rooms.append({"label": lb, "cells": r})
 
+    grow_undersized(p, rooms, labels, s)
+    taken[:] = False
+    for r in rooms:
+        i0, j0, i1, j1 = r["cells"]
+        taken[i0:i1 + 1, j0:j1 + 1] = True
+
     # Unclaimed floor inside the labelled area becomes passages, or asks the model for a name
     if rooms:
         bi0 = min(r["cells"][0] for r in rooms); bj0 = min(r["cells"][1] for r in rooms)
@@ -285,18 +299,23 @@ def build(bgr, found, furniture_found=None, namer=None):
             i0, j0, i1, j1 = best
             free[i0:i1 + 1, j0:j1 + 1] = False
             w_ft, h_ft = (p.xs[i1 + 1] - p.xs[i0]) / s, (p.ys[j1 + 1] - p.ys[j0]) / s
-            if min(w_ft, h_ft) < 2.5:  # sliver between double lines: give it to a neighbour
-                absorb(p, rooms, best)
+            # Slivers between double lines go to a neighbour; strips a person fits through stay passages
+            if min(w_ft, h_ft) < 2.5 and absorb(p, rooms, best):
+                continue
+            if min(w_ft, h_ft) < 1.5:
                 continue
             rooms.append({"label": None, "cells": best})
 
-    # Pixel and feet rectangles
-    x_org, y_org = min(p.xs[r["cells"][0]] for r in rooms), min(p.ys[r["cells"][1]] for r in rooms)
+    # Pixel and feet rectangles. Edges on two lines a wall's thickness apart are
+    # snapped to one, so neighbours share the wall and the door in it can be found.
+    xmap = snap_lines(p, [e for r in rooms for e in (r["cells"][0], r["cells"][2] + 1)], s, vertical=True)
+    ymap = snap_lines(p, [e for r in rooms for e in (r["cells"][1], r["cells"][3] + 1)], s, vertical=False)
+    x_org, y_org = min(xmap[r["cells"][0]] for r in rooms), min(ymap[r["cells"][1]] for r in rooms)
     q = lambda v: round(v * 4) / 4
     out_rooms, used = [], {}
     for r in rooms:
         i0, j0, i1, j1 = r["cells"]
-        px = (p.xs[i0], p.ys[j0], p.xs[i1 + 1], p.ys[j1 + 1])
+        px = (xmap[i0], ymap[j0], xmap[i1 + 1], ymap[j1 + 1])
         lb = r["label"]
         if lb is None:
             enclosed = all(c >= STRONG for c in edge_coverages(p, r["cells"]))
@@ -316,14 +335,22 @@ def build(bgr, found, furniture_found=None, namer=None):
             "x": q((px[0] - x_org) / s), "y": q((px[1] - y_org) / s),
             "w": q((px[2] - x_org) / s) - q((px[0] - x_org) / s),
             "d": q((px[3] - y_org) / s) - q((px[1] - y_org) / s),
-            "_px": px,
+            "_px": px, "_guessed": r["label"] is None,
         })
 
     doors, windows = openings(p, out_rooms, s, found.get("entrance"))
+    # An enclosed space with no printed label and no door is a shaft or duct, not part
+    # of the flat, even if the model guessed a name for it from the crop
+    connected = {d["from"] for d in doors} | {d["to"] for d in doors}
+    shafts = {r["id"] for r in out_rooms if r["_guessed"] and r["type"] != "passage" and r["id"] not in connected}
+    for sid in shafts:
+        print(f"[geometry] dropping '{sid}': enclosed, no printed label, no door (shaft?)", file=sys.stderr)
+    out_rooms = [r for r in out_rooms if r["id"] not in shafts]
+    windows = [w for w in windows if w["room"] not in shafts]
     furniture = place_furniture(furniture_found or [], out_rooms, s, x_org, y_org, W, H)
     dbg = debug_image(p, [{"id": r["id"], "px": r["_px"]} for r in out_rooms])
     for r in out_rooms:
-        r.pop("_px")
+        r.pop("_px"); r.pop("_guessed")
     plan = {
         "schema_version": "1.0", "units": "ft",
         "meta": {"title": "", "bhk": "", "facing": "unknown", "total_area_sqft": 0, "carpet_area_sqft": 0,
@@ -335,19 +362,87 @@ def build(bgr, found, furniture_found=None, namer=None):
     return plan, dbg
 
 
+def snap_lines(p, used, s, vertical, within=0.75):
+    """Map grid-line index -> pixel position, merging used lines closer than `within` ft
+    onto the one that carries the most wall."""
+    pos = p.xs if vertical else p.ys
+    strength = (p.cov_v.sum(axis=1) if vertical else p.cov_h.sum(axis=0))
+    idx = sorted(set(used))
+    out, group = {}, []
+    for i in idx + [None]:
+        if group and (i is None or pos[i] - pos[group[-1]] > within * s):
+            rep = max(group, key=lambda g: strength[g])
+            for g in group:
+                out[g] = pos[rep]
+            group = []
+        if i is not None:
+            group.append(i)
+    return out
+
+
+def rect_cost(p, r, dims, s):
+    i0, j0, i1, j1 = r
+    return size_cost((p.xs[i1 + 1] - p.xs[i0]) / s, (p.ys[j1 + 1] - p.ys[j0]) / s, dims)
+
+
+def grow_undersized(p, rooms, labels, s, min_gain=1.0, line_penalty=0.1):
+    """Built-in counters and wardrobes are often drawn like walls and cut a room
+    short. A room well under its printed size may grow into unclaimed floor across
+    such lines, when that brings it much closer to the printed size."""
+    claimed = np.zeros((p.nx, p.ny), int) - 1
+    for k, r in enumerate(rooms):
+        i0, j0, i1, j1 = r["cells"]
+        claimed[i0:i1 + 1, j0:j1 + 1] = k
+    for lb in labels:
+        if claimed[lb["cell"]] < 0:
+            claimed[lb["cell"]] = -2  # an unplaced label still blocks growth
+    for k, r in enumerate(rooms):
+        dims = r["label"]["dims"]
+        if not dims or dims[1] is None:
+            continue
+        a0, b0, a1, b1 = r["cells"]
+        now = rect_cost(p, r["cells"], dims, s)
+        if now <= 1.5:
+            continue
+        best, best_cost = None, now - min_gain
+        for i0 in range(a0, -1, -1):
+            for i1 in range(a1, p.nx):
+                for j0 in range(b0, -1, -1):
+                    for j1 in range(b1, p.ny):
+                        area = claimed[i0:i1 + 1, j0:j1 + 1]
+                        if ((area != k) & (area != -1)).any() or p.outside[i0:i1 + 1, j0:j1 + 1].any():
+                            continue
+                        crossed = sum(
+                            p.cov_v[i, j] * (p.ys[j + 1] - p.ys[j]) for i in range(i0 + 1, i1 + 1) for j in range(j0, j1 + 1)
+                            if p.cov_v[i, j] >= STRONG and not (a0 < i <= a1 and b0 <= j <= b1)
+                        ) + sum(
+                            p.cov_h[i, j] * (p.xs[i + 1] - p.xs[i]) for i in range(i0, i1 + 1) for j in range(j0 + 1, j1 + 1)
+                            if p.cov_h[i, j] >= STRONG and not (a0 <= i <= a1 and b0 < j <= b1)
+                        )
+                        c = rect_cost(p, (i0, j0, i1, j1), dims, s) + line_penalty * crossed / s
+                        if c < best_cost:
+                            best, best_cost = (i0, j0, i1, j1), c
+        if best:
+            print(f"[geometry] {r['label']['text']}: grew across built-in lines, size error {now:.1f} -> "
+                  f"{rect_cost(p, best, dims, s):.1f} ft", file=sys.stderr)
+            r["cells"] = best
+            i0, j0, i1, j1 = best
+            claimed[i0:i1 + 1, j0:j1 + 1] = k
+
+
 def absorb(p, rooms, cells):
     """Extend a neighbouring room over a sliver that shares one of its full sides."""
     i0, j0, i1, j1 = cells
     for r in rooms:
         a0, b0, a1, b1 = r["cells"]
         if (a0, a1) == (i0, i1) and b1 + 1 == j0 and (p.cov_h[i0:i1 + 1, j0] < STRONG).all():
-            r["cells"] = (a0, b0, a1, j1); return
+            r["cells"] = (a0, b0, a1, j1); return True
         if (a0, a1) == (i0, i1) and j1 + 1 == b0 and (p.cov_h[i0:i1 + 1, b0] < STRONG).all():
-            r["cells"] = (a0, j0, a1, b1); return
+            r["cells"] = (a0, j0, a1, b1); return True
         if (b0, b1) == (j0, j1) and a1 + 1 == i0 and (p.cov_v[i0, j0:j1 + 1] < STRONG).all():
-            r["cells"] = (a0, b0, i1, b1); return
+            r["cells"] = (a0, b0, i1, b1); return True
         if (b0, b1) == (j0, j1) and i1 + 1 == a0 and (p.cov_v[a0, j0:j1 + 1] < STRONG).all():
-            r["cells"] = (i0, b0, a1, b1); return
+            r["cells"] = (i0, b0, a1, b1); return True
 
 
 def nearest_inside(p, x, y):
@@ -406,22 +501,15 @@ def openings(p, rooms, s, entrance):
             # Exterior: whatever part of this side no other room shares
             if a["type"] in OUTDOOR:
                 continue
-            _, gaps = wall_runs(p, o, c, st, en)
-            for g0, g1 in gaps:
+            for g0, g1, hole in thin_runs(p, o, c, st, en, 1.25 * s):
                 mid = (g0 + g1) / 2
                 if g1 - g0 < 1.25 * s or any(lo <= mid <= hi for lo, hi, _ in shared):
                     continue
-                exterior.append({"room": a, "side": side, "o": o, "c": c, "g": (g0, g1), "len": en - st, "st": st})
+                width = (g1 - g0) / s
+                exterior.append({"room": a, "side": side, "o": o, "c": c, "g": (g0, g1), "len": en - st, "st": st,
+                                 "door_like": hole > 0.6 and 2.5 <= width <= 4.75})
 
-    main = None
-    if entrance and exterior:
-        ex1, ey1, ex2, ey2 = to_px(entrance["bbox_2d"], p.W, p.H)
-        ex, ey = (ex1 + ex2) / 2, (ey1 + ey2) / 2
-        def dist(e):
-            m = (e["g"][0] + e["g"][1]) / 2
-            x, y = (m, e["c"]) if e["o"] == 'h' else (e["c"], m)
-            return (x - ex) ** 2 + (y - ey) ** 2
-        main = min(exterior, key=dist)
+    main = pick_main_door(p, s, exterior, entrance)
     for e in exterior:
         width = (e["g"][1] - e["g"][0]) / s
         pos = round(((e["g"][0] + e["g"][1]) / 2 - e["st"]) / e["len"], 2)
@@ -433,6 +521,48 @@ def openings(p, rooms, s, entrance):
             windows.append({"id": f"w_{e['room']['id']}_{len(windows)}", "room": e["room"]["id"], "side": e["side"],
                             "kind": kind, "width_ft": min(round(width * 4) / 4, 8), "pos": pos})
     return doors, windows
+
+
+MAIN_DOOR_ROOMS = ["foyer", "drawing", "living", "dining", "passage"]
+
+
+def pick_main_door(p, s, exterior, entrance):
+    """Entrance arrow found by OpenCV, else the model's arrow if it sits by a real door
+    gap, else the door-shaped gap into the room a front door usually opens into."""
+    if not exterior:
+        return None
+
+    def at(e):
+        m = (e["g"][0] + e["g"][1]) / 2
+        return (m, e["c"]) if e["o"] == 'h' else (e["c"], m)
+
+    def nearest(pt):
+        return min(exterior, key=lambda e: (at(e)[0] - pt[0]) ** 2 + (at(e)[1] - pt[1]) ** 2)
+
+    def ft(e, pt):
+        return ((at(e)[0] - pt[0]) ** 2 + (at(e)[1] - pt[1]) ** 2) ** 0.5 / s
+
+    arrows = find_arrows(p, s)
+    if arrows:
+        best = min(((nearest(a), a) for a in arrows), key=lambda t: ft(*t))
+        if ft(*best) < 6:
+            print(f"[geometry] main door: entrance arrow found at {tuple(round(v) for v in best[1])} px", file=sys.stderr)
+            return best[0]
+    if entrance and len(entrance.get("bbox_2d", [])) == 4:
+        x1, y1, x2, y2 = to_px(entrance["bbox_2d"], p.W, p.H)
+        pt = ((x1 + x2) / 2, (y1 + y2) / 2)
+        e = nearest(pt)
+        if e["door_like"] and ft(e, pt) < 6:
+            print(f"[geometry] main door: model's entrance arrow, by the {e['room']['id']} {e['side']} wall", file=sys.stderr)
+            return e
+    doorish = [e for e in exterior if e["door_like"]]
+    rank = lambda e: MAIN_DOOR_ROOMS.index(e["room"]["type"]) if e["room"]["type"] in MAIN_DOOR_ROOMS else 99
+    if doorish and rank(min(doorish, key=rank)) < 99:
+        e = min(doorish, key=rank)
+        print(f"[geometry] main door: no arrow; door-shaped gap into {e['room']['id']}", file=sys.stderr)
+        return e
+    print("[geometry] main door: not found", file=sys.stderr)
+    return None
 
 
 def door(a, b, kind, width, pos):

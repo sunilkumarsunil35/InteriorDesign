@@ -165,21 +165,11 @@
       "label_dims": "11'4\"x15'0\"",
       "x": 23.5,
       "y": 26.25,
-      "w": 8.5,
-      "d": 14.5
+      "w": 12.0,
+      "d": 15.75
     },
     {
       "id": "passage",
-      "type": "passage",
-      "label": "",
-      "label_dims": "",
-      "x": 32.0,
-      "y": 28.25,
-      "w": 3.5,
-      "d": 9.75
-    },
-    {
-      "id": "passage_2",
       "type": "passage",
       "label": "",
       "label_dims": "",
@@ -187,6 +177,16 @@
       "y": 9.25,
       "w": 5.25,
       "d": 4.5
+    },
+    {
+      "id": "passage_2",
+      "type": "passage",
+      "label": "",
+      "label_dims": "",
+      "x": 12.5,
+      "y": 31.25,
+      "w": 5.25,
+      "d": 1.75
     }
   ],
   "doors": [
@@ -201,12 +201,12 @@
       "main": false
     },
     {
-      "id": "4_6_wide_utility_passage",
+      "id": "4_6_wide_utility_kitchen",
       "from": "4_6_wide_utility",
-      "to": "passage",
+      "to": "kitchen",
       "kind": "hinged",
       "width_ft": 2.25,
-      "pos": 0.25,
+      "pos": 0.28,
       "side": "auto",
       "main": false
     },
@@ -234,6 +234,16 @@
       "id": "dining_pooja",
       "from": "dining",
       "to": "pooja",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_passage",
+      "from": "dining",
+      "to": "passage",
       "kind": "opening",
       "width_ft": 0,
       "pos": 0.5,
@@ -331,9 +341,9 @@
       "main": false
     },
     {
-      "id": "bed_room_02_passage_2",
+      "id": "bed_room_02_passage",
       "from": "bed_room_02",
-      "to": "passage_2",
+      "to": "passage",
       "kind": "opening",
       "width_ft": 0,
       "pos": 0.5,
@@ -361,50 +371,72 @@
       "main": false
     },
     {
-      "id": "kitchen_passage",
-      "from": "kitchen",
-      "to": "passage",
-      "kind": "opening",
-      "width_ft": 0,
-      "pos": 0.5,
-      "side": "auto",
-      "main": false
-    },
-    {
       "id": "main",
-      "from": "m_bed_room",
+      "from": "drawing",
       "to": "outside",
       "kind": "hinged",
-      "width_ft": 4,
-      "pos": 0.63,
-      "side": "bottom",
+      "width_ft": 3.5,
+      "pos": 0.28,
+      "side": "left",
       "main": true
     }
   ],
   "windows": [
     {
-      "id": "w_dining_0",
-      "room": "dining",
+      "id": "w_m_bed_room_0",
+      "room": "m_bed_room",
       "side": "bottom",
       "kind": "window",
-      "width_ft": 4.5,
-      "pos": 0.22
+      "width_ft": 6.0,
+      "pos": 0.63
     },
     {
-      "id": "w_drawing_1",
+      "id": "w_m_bed_room_1",
+      "room": "m_bed_room",
+      "side": "left",
+      "kind": "window",
+      "width_ft": 1.75,
+      "pos": 0.19
+    },
+    {
+      "id": "w_toilet_01_2",
+      "room": "toilet_01",
+      "side": "bottom",
+      "kind": "ventilator",
+      "width_ft": 1.75,
+      "pos": 0.47
+    },
+    {
+      "id": "w_bed_room_02_3",
+      "room": "bed_room_02",
+      "side": "top",
+      "kind": "window",
+      "width_ft": 6.0,
+      "pos": 0.63
+    },
+    {
+      "id": "w_drawing_4",
       "room": "drawing",
       "side": "left",
       "kind": "window",
-      "width_ft": 3.25,
-      "pos": 0.28
+      "width_ft": 4.0,
+      "pos": 0.76
     },
     {
-      "id": "w_kitchen_2",
+      "id": "w_bed_room_03_5",
+      "room": "bed_room_03",
+      "side": "top",
+      "kind": "window",
+      "width_ft": 4.75,
+      "pos": 0.33
+    },
+    {
+      "id": "w_kitchen_6",
       "room": "kitchen",
       "side": "bottom",
       "kind": "window",
-      "width_ft": 2.25,
-      "pos": 0.71
+      "width_ft": 3.5,
+      "pos": 0.55
     }
   ],
   "furniture": [
@@ -563,6 +595,15 @@
     },
     {
       "type": "kitchen_counter",
+      "room": "passage_2",
+      "cx": 14.72,
+      "cy": 31.83,
+      "w": 4.87,
+      "d": 1.82,
+      "rot": 0
+    },
+    {
+      "type": "kitchen_counter",
       "room": "kitchen",
       "cx": 25.59,
       "cy": 32.89,
@@ -578,6 +619,15 @@
       "w": 1.39,
       "d": 2.02,
       "rot": 270
+    },
+    {
+      "type": "sink",
+      "room": "passage_2",
+      "cx": 14.81,
+      "cy": 31.99,
+      "w": 2.26,
+      "d": 1.51,
+      "rot": 0
     },
     {
       "type": "fridge",
@@ -614,6 +664,15 @@
       "w": 0.87,
       "d": 1.41,
       "rot": 180
+    },
+    {
+      "type": "washbasin",
+      "room": "passage_2",
+      "cx": 14.81,
+      "cy": 31.99,
+      "w": 2.26,
+      "d": 1.51,
+      "rot": 0
     },
     {
       "type": "washbasin",
