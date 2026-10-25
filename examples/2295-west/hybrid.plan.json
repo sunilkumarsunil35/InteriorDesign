@@ -1,0 +1,673 @@
+{
+  "schema_version": "1.0",
+  "units": "ft",
+  "meta": {
+    "title": "brochure (hybrid extraction)",
+    "bhk": "",
+    "facing": "unknown",
+    "total_area_sqft": 0,
+    "carpet_area_sqft": 0,
+    "balcony_area_sqft": 0,
+    "north_deg": 0,
+    "notes": "Hybrid extraction: OpenCV geometry at 21.8 px/ft, local-model labels."
+  },
+  "defaults": {
+    "wall_height_ft": 10,
+    "ext_wall_thickness_ft": 0.75,
+    "int_wall_thickness_ft": 0.5,
+    "door_height_ft": 7
+  },
+  "rooms": [
+    {
+      "id": "4_6_wide_utility",
+      "type": "utility",
+      "label": "4'6\" WIDE UTILITY",
+      "label_dims": "",
+      "x": 35.5,
+      "y": 26.25,
+      "w": 5.5,
+      "d": 15.75
+    },
+    {
+      "id": "4_6_wide_balcony",
+      "type": "balcony",
+      "label": "4'6\" WIDE BALCONY",
+      "label_dims": "",
+      "x": 35.5,
+      "y": 0.0,
+      "w": 5.5,
+      "d": 13.75
+    },
+    {
+      "id": "dining",
+      "type": "dining",
+      "label": "DINING",
+      "label_dims": "10'8\"x17'0\"",
+      "x": 12.5,
+      "y": 13.75,
+      "w": 11.0,
+      "d": 17.5
+    },
+    {
+      "id": "m_bed_room",
+      "type": "master_bedroom",
+      "label": "M.BED ROOM",
+      "label_dims": "12'0\"x15'0\"",
+      "x": 0.0,
+      "y": 26.25,
+      "w": 12.5,
+      "d": 15.75
+    },
+    {
+      "id": "closet",
+      "type": "closet",
+      "label": "CLOSET",
+      "label_dims": "4'10\"x8'4\"",
+      "x": 12.5,
+      "y": 33.0,
+      "w": 5.25,
+      "d": 9.0
+    },
+    {
+      "id": "toilet_01",
+      "type": "toilet",
+      "label": "TOILET-01",
+      "label_dims": "5'6\"x10'0\"",
+      "x": 17.75,
+      "y": 31.25,
+      "w": 5.75,
+      "d": 10.75
+    },
+    {
+      "id": "5_6_out",
+      "type": "sitout",
+      "label": "5'6\" OUT",
+      "label_dims": "6'7\"x11'8\"",
+      "x": 34.0,
+      "y": 13.75,
+      "w": 7.0,
+      "d": 12.5
+    },
+    {
+      "id": "bed_room_02",
+      "type": "bedroom",
+      "label": "BED ROOM-02",
+      "label_dims": "12'0\"x13'0\"",
+      "x": 0.0,
+      "y": 0.0,
+      "w": 12.5,
+      "d": 13.75
+    },
+    {
+      "id": "drawing",
+      "type": "drawing",
+      "label": "DRAWING",
+      "label_dims": "12'4\"x12'0\"",
+      "x": 0.0,
+      "y": 13.75,
+      "w": 12.5,
+      "d": 12.5
+    },
+    {
+      "id": "living",
+      "type": "living",
+      "label": "LIVING",
+      "label_dims": "10'5\"x12'0\"",
+      "x": 23.5,
+      "y": 13.75,
+      "w": 10.5,
+      "d": 12.5
+    },
+    {
+      "id": "bed_room_03",
+      "type": "bedroom",
+      "label": "BED ROOM-03",
+      "label_dims": "11'8\"x13'0\"",
+      "x": 23.5,
+      "y": 0.0,
+      "w": 12.0,
+      "d": 13.75
+    },
+    {
+      "id": "pooja",
+      "type": "pooja",
+      "label": "POOJA",
+      "label_dims": "5'0\"x4'4\"",
+      "x": 17.75,
+      "y": 9.25,
+      "w": 5.75,
+      "d": 4.5
+    },
+    {
+      "id": "toilet_02",
+      "type": "toilet",
+      "label": "TOILET-02",
+      "label_dims": "5'0\"x6'0\"",
+      "x": 12.5,
+      "y": 0.0,
+      "w": 5.25,
+      "d": 9.25
+    },
+    {
+      "id": "toilet_03",
+      "type": "toilet",
+      "label": "TOILET-03",
+      "label_dims": "5'0\"x6'0\"",
+      "x": 17.75,
+      "y": 0.0,
+      "w": 5.75,
+      "d": 9.25
+    },
+    {
+      "id": "kitchen",
+      "type": "kitchen",
+      "label": "KITCHEN",
+      "label_dims": "11'4\"x15'0\"",
+      "x": 23.5,
+      "y": 26.25,
+      "w": 8.5,
+      "d": 14.5
+    },
+    {
+      "id": "passage",
+      "type": "passage",
+      "label": "",
+      "label_dims": "",
+      "x": 32.0,
+      "y": 28.25,
+      "w": 3.5,
+      "d": 9.75
+    },
+    {
+      "id": "passage_2",
+      "type": "passage",
+      "label": "",
+      "label_dims": "",
+      "x": 12.5,
+      "y": 9.25,
+      "w": 5.25,
+      "d": 4.5
+    }
+  ],
+  "doors": [
+    {
+      "id": "4_6_wide_utility_5_6_out",
+      "from": "4_6_wide_utility",
+      "to": "5_6_out",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "4_6_wide_utility_passage",
+      "from": "4_6_wide_utility",
+      "to": "passage",
+      "kind": "hinged",
+      "width_ft": 2.25,
+      "pos": 0.25,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "4_6_wide_balcony_5_6_out",
+      "from": "4_6_wide_balcony",
+      "to": "5_6_out",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "4_6_wide_balcony_bed_room_03",
+      "from": "4_6_wide_balcony",
+      "to": "bed_room_03",
+      "kind": "hinged",
+      "width_ft": 2.25,
+      "pos": 0.67,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_pooja",
+      "from": "dining",
+      "to": "pooja",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_passage_2",
+      "from": "dining",
+      "to": "passage_2",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_m_bed_room",
+      "from": "dining",
+      "to": "m_bed_room",
+      "kind": "hinged",
+      "width_ft": 3.25,
+      "pos": 0.38,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_drawing",
+      "from": "dining",
+      "to": "drawing",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_living",
+      "from": "dining",
+      "to": "living",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "dining_kitchen",
+      "from": "dining",
+      "to": "kitchen",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "m_bed_room_closet",
+      "from": "m_bed_room",
+      "to": "closet",
+      "kind": "hinged",
+      "width_ft": 3.0,
+      "pos": 0.56,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "closet_toilet_01",
+      "from": "closet",
+      "to": "toilet_01",
+      "kind": "hinged",
+      "width_ft": 2.75,
+      "pos": 0.48,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "5_6_out_living",
+      "from": "5_6_out",
+      "to": "living",
+      "kind": "hinged",
+      "width_ft": 3.5,
+      "pos": 0.33,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "bed_room_02_toilet_02",
+      "from": "bed_room_02",
+      "to": "toilet_02",
+      "kind": "hinged",
+      "width_ft": 2.5,
+      "pos": 0.51,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "bed_room_02_passage_2",
+      "from": "bed_room_02",
+      "to": "passage_2",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "living_bed_room_03",
+      "from": "living",
+      "to": "bed_room_03",
+      "kind": "hinged",
+      "width_ft": 3.0,
+      "pos": 0.17,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "bed_room_03_toilet_03",
+      "from": "bed_room_03",
+      "to": "toilet_03",
+      "kind": "hinged",
+      "width_ft": 2.75,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "kitchen_passage",
+      "from": "kitchen",
+      "to": "passage",
+      "kind": "opening",
+      "width_ft": 0,
+      "pos": 0.5,
+      "side": "auto",
+      "main": false
+    },
+    {
+      "id": "main",
+      "from": "m_bed_room",
+      "to": "outside",
+      "kind": "hinged",
+      "width_ft": 4,
+      "pos": 0.63,
+      "side": "bottom",
+      "main": true
+    }
+  ],
+  "windows": [
+    {
+      "id": "w_dining_0",
+      "room": "dining",
+      "side": "bottom",
+      "kind": "window",
+      "width_ft": 4.5,
+      "pos": 0.22
+    },
+    {
+      "id": "w_drawing_1",
+      "room": "drawing",
+      "side": "left",
+      "kind": "window",
+      "width_ft": 3.25,
+      "pos": 0.28
+    },
+    {
+      "id": "w_kitchen_2",
+      "room": "kitchen",
+      "side": "bottom",
+      "kind": "window",
+      "width_ft": 2.25,
+      "pos": 0.71
+    }
+  ],
+  "furniture": [
+    {
+      "type": "bed_single",
+      "room": "bed_room_02",
+      "cx": 3.54,
+      "cy": 5.62,
+      "w": 5.83,
+      "d": 6.81,
+      "rot": 90
+    },
+    {
+      "type": "bed_double",
+      "room": "m_bed_room",
+      "cx": 3.85,
+      "cy": 34.89,
+      "w": 6.44,
+      "d": 6.31,
+      "rot": 90
+    },
+    {
+      "type": "bed_double",
+      "room": "bed_room_03",
+      "cx": 31.85,
+      "cy": 4.56,
+      "w": 6.09,
+      "d": 6.31,
+      "rot": 270
+    },
+    {
+      "type": "sofa",
+      "room": "drawing",
+      "cx": 1.5,
+      "cy": 21.52,
+      "w": 2.61,
+      "d": 5.0,
+      "rot": 90
+    },
+    {
+      "type": "sofa",
+      "room": "drawing",
+      "cx": 6.63,
+      "cy": 24.32,
+      "w": 6.96,
+      "d": 2.52,
+      "rot": 180
+    },
+    {
+      "type": "sofa",
+      "room": "living",
+      "cx": 27.55,
+      "cy": 24.32,
+      "w": 6.87,
+      "d": 2.52,
+      "rot": 90
+    },
+    {
+      "type": "armchair",
+      "room": "m_bed_room",
+      "cx": 2.11,
+      "cy": 27.97,
+      "w": 2.09,
+      "d": 2.67,
+      "rot": 0
+    },
+    {
+      "type": "armchair",
+      "room": "m_bed_room",
+      "cx": 6.2,
+      "cy": 27.97,
+      "w": 2.61,
+      "d": 2.67,
+      "rot": 0
+    },
+    {
+      "type": "armchair",
+      "room": "drawing",
+      "cx": 11.07,
+      "cy": 19.07,
+      "w": 2.44,
+      "d": 2.52,
+      "rot": 270
+    },
+    {
+      "type": "armchair",
+      "room": "drawing",
+      "cx": 11.07,
+      "cy": 21.84,
+      "w": 2.44,
+      "d": 2.42,
+      "rot": 270
+    },
+    {
+      "type": "coffee_table",
+      "room": "drawing",
+      "cx": 6.11,
+      "cy": 20.83,
+      "w": 3.13,
+      "d": 2.22,
+      "rot": 0
+    },
+    {
+      "type": "coffee_table",
+      "room": "living",
+      "cx": 27.33,
+      "cy": 21.04,
+      "w": 3.13,
+      "d": 2.22,
+      "rot": 0
+    },
+    {
+      "type": "side_table",
+      "room": "drawing",
+      "cx": 1.41,
+      "cy": 24.8,
+      "w": 1.57,
+      "d": 1.56,
+      "rot": 0
+    },
+    {
+      "type": "side_table",
+      "room": "drawing",
+      "cx": 10.72,
+      "cy": 24.62,
+      "w": 1.74,
+      "d": 1.92,
+      "rot": 0
+    },
+    {
+      "type": "side_table",
+      "room": "living",
+      "cx": 31.94,
+      "cy": 24.62,
+      "w": 1.74,
+      "d": 1.92,
+      "rot": 0
+    },
+    {
+      "type": "dining_table",
+      "room": "dining",
+      "cx": 17.41,
+      "cy": 22.3,
+      "w": 4.0,
+      "d": 6.56,
+      "rot": 0
+    },
+    {
+      "type": "dining_table",
+      "room": "dining",
+      "cx": 17.24,
+      "cy": 22.5,
+      "w": 5.04,
+      "d": 6.16,
+      "rot": 0
+    },
+    {
+      "type": "kitchen_counter",
+      "room": "kitchen",
+      "cx": 25.59,
+      "cy": 32.89,
+      "w": 1.57,
+      "d": 2.12,
+      "rot": 90
+    },
+    {
+      "type": "stove",
+      "room": "toilet_01",
+      "cx": 22.2,
+      "cy": 36.07,
+      "w": 1.39,
+      "d": 2.02,
+      "rot": 270
+    },
+    {
+      "type": "fridge",
+      "room": "kitchen",
+      "cx": 29.42,
+      "cy": 40.61,
+      "w": 1.57,
+      "d": 1.82,
+      "rot": 180
+    },
+    {
+      "type": "wc",
+      "room": "toilet_02",
+      "cx": 14.54,
+      "cy": 2.17,
+      "w": 1.74,
+      "d": 1.51,
+      "rot": 90
+    },
+    {
+      "type": "wc",
+      "room": "toilet_03",
+      "cx": 21.5,
+      "cy": 2.17,
+      "w": 1.74,
+      "d": 1.51,
+      "rot": 270
+    },
+    {
+      "type": "wc",
+      "room": "toilet_01",
+      "cx": 20.2,
+      "cy": 39.4,
+      "w": 0.87,
+      "d": 1.41,
+      "rot": 180
+    },
+    {
+      "type": "washbasin",
+      "room": "toilet_01",
+      "cx": 22.2,
+      "cy": 36.07,
+      "w": 1.39,
+      "d": 2.02,
+      "rot": 270
+    },
+    {
+      "type": "shower",
+      "room": "toilet_02",
+      "cx": 16.54,
+      "cy": 4.92,
+      "w": 1.22,
+      "d": 1.97,
+      "rot": 0
+    },
+    {
+      "type": "shower",
+      "room": "toilet_03",
+      "cx": 18.98,
+      "cy": 4.92,
+      "w": 1.22,
+      "d": 1.97,
+      "rot": 0
+    },
+    {
+      "type": "washing_machine",
+      "room": "4_6_wide_utility",
+      "cx": 37.16,
+      "cy": 27.55,
+      "w": 1.74,
+      "d": 1.82,
+      "rot": 0
+    },
+    {
+      "type": "dishwasher",
+      "room": "kitchen",
+      "cx": 25.59,
+      "cy": 32.89,
+      "w": 1.57,
+      "d": 2.12,
+      "rot": 90
+    },
+    {
+      "type": "plant",
+      "room": "m_bed_room",
+      "cx": 3.85,
+      "cy": 28.98,
+      "w": 1.39,
+      "d": 1.46,
+      "rot": 0
+    }
+  ]
+}

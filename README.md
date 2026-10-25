@@ -2,13 +2,13 @@
 
 Turn a 2D floor-plan image (a real-estate brochure, a scan, a screenshot) into a structured **plan.json**, then into a walkable 3D model.
 
-The vision model is used **once per image**, only to read the plan. Everything after that runs locally without AI: validation, geometry, the 3D model, and the walkthrough.
+By default the whole extraction runs on your own GPU: OpenCV measures the walls, and a small local vision model reads and locates the printed labels. Claude is called only when the result fails validation. Everything after extraction runs without AI: validation, geometry, the 3D model, and the walkthrough.
 
 ```
-floor-plan image ──► extract/extract_plan.py ──► plan.json ──► builder/plan2scene.js ──► scene.json ──► three.js / .glb
-     (crop)            Claude or local VLM        (feet)        (no deps, pure JS)        (metres)      any 3D app
-                           │
-                           └─ extract/validate.py checks it; on errors, one text-only correction pass
+floor-plan image ─┬─► extract/geometry.py (OpenCV) ── walls, grid, scale ──┐
+     (crop)       │                                                         ├─► plan.json ─► validate ─► 3D
+                  └─► local VLM via Ollama ── label text + positions,  ─────┘                    │
+                       entrance arrow, furniture boxes                         errors only ──► Claude corrects the draft
 ```
 
 ## Try the example
@@ -30,36 +30,60 @@ Open http://localhost:8000. It loads [examples/2295-west/plan.json](examples/229
 
 ```bash
 pip install -r requirements.txt
+ollama pull qwen3-vl:8b-instruct     # the non-thinking build; the default qwen3-vl:8b thinks for minutes
 
-# Claude (needs ANTHROPIC_API_KEY)
+# Hybrid (default): OpenCV + local model, Claude only if validation fails
 python extract/extract_plan.py brochure.jpg --crop 295,650,670,1085 -o out/plan.json
-
-# Fully local with Ollama and a vision model
-ollama pull qwen2.5vl:7b
-python extract/extract_plan.py brochure.jpg --crop 295,650,670,1085 --provider ollama -o out/plan.json
 ```
 
-Then view it: http://localhost:8000/?plan=out/plan.json, or click **Load plan.json**.
+Then view it: http://localhost:8000/?plan=out/plan.json, or click **Load plan.json**. Next to the plan, `out/plan.debug.png` shows the detected walls, grid cells and room rectangles.
+
+### How the hybrid works
+
+Small local vision models read text well but cannot lay out rooms: asked for the whole plan, qwen3-vl 8B placed rooms 17 ft off on average. So the work is split:
+
+1. **Walls (OpenCV, [geometry.py](extract/geometry.py))**: mid-grey thick strokes are walls. Thin dark strokes (furniture outlines) and solid areas thicker than a wall (counters, TV units) are discarded. Wall centrelines make a grid of cells, and the outside is flood-filled in from the image border, with window glazing and balcony rails counting as enclosure.
+2. **Labels (local model, [hybrid.py](extract/hybrid.py))**: three short calls ask the model to *point*, which Qwen-VL models are trained for. Where is each room label and what does it say? Where is the entrance arrow? Where is each furniture symbol? Rooms without a readable label are cropped and asked about one at a time.
+3. **Scale**: the px-per-foot value that makes the enclosed rooms best match their printed sizes.
+4. **Rooms**: each label claims the rectangle of grid cells around it that best fits its printed size, without crossing a solid wall or swallowing another label. Leftover floor becomes passages; slivers between double lines join a neighbour.
+5. **Doors and windows**: gaps along shared walls are doors (open-plan when there's no wall at all). Gaps in outer walls are windows, and the one nearest the entrance arrow is the main door. Furniture is turned to face away from its nearest wall.
+
+On the example brochure (RX 9070 XT, 16 GB): **43 s, 16/16 rooms, median position error 0.1 ft against the hand-checked plan, 0 validation errors, no Claude call.** Compare [hybrid.plan.json](examples/2295-west/hybrid.plan.json) with the reference [plan.json](examples/2295-west/plan.json) and see [hybrid.debug.png](examples/2295-west/hybrid.debug.png).
+
+Known limits: a kitchen counter drawn in wall grey can split the kitchen (the strip becomes an open "passage"), thin window glazing is often missed, and the area table outside the crop isn't read.
+
+### Other modes
+
+```bash
+# Whole plan from Claude (needs ANTHROPIC_API_KEY)
+python extract/extract_plan.py brochure.jpg --crop ... --mode vlm --provider claude -o out/plan.json
+# Whole plan from the local model (fast, but room positions are unreliable)
+python extract/extract_plan.py brochure.jpg --crop ... --mode vlm --provider ollama -o out/plan.json
+# Score any result against a reference
+python extract/compare.py out/plan.json examples/2295-west/plan.json
+```
 
 | Flag | Default | Notes |
 |---|---|---|
-| `--crop x0,y0,x1,y1` | none | Isolate one plan on a multi-plan brochure page. The biggest token saving. |
-| `--max-side` | 1100 | Long side in px sent to the model. Small crops are upscaled so labels stay legible. |
-| `--provider` | claude | `claude` or `ollama` |
-| `--model` | claude-opus-5-5 / qwen2.5vl:7b | Any Claude vision model id, e.g. `claude-haiku-5-5` for lower cost. |
+| `--crop x0,y0,x1,y1` | none | Isolate one plan on a multi-plan brochure page. |
+| `--max-side` | 1100 | Long side in px. Small crops are upscaled so labels stay legible. |
+| `--mode` | hybrid | `hybrid` or `vlm` |
+| `--local-model` | qwen3-vl:8b-instruct | Ollama vision model for hybrid mode |
+| `--fallback` | claude | `claude` or `none`; used only when the hybrid plan fails validation and credentials exist |
+| `--provider` | claude | Model for `--mode vlm`: `claude` or `ollama` |
+| `--model` | claude-opus-5-5 | Any Claude vision model id, e.g. `claude-haiku-5-5` for lower cost |
 | `--effort` | high | Claude reasoning effort: low, medium, high, xhigh, max |
-| `--retries` | 1 | Correction passes when validation finds errors |
+| `--no-furniture` | off | Skip the furniture call |
 
-The Claude call uses server-side refusal fallbacks (`fallbacks: "default"`). If the main model declines a request, the API retries it on a fallback model inside the same call.
+Claude calls use server-side refusal fallbacks (`fallbacks: "default"`). If the main model declines a request, the API retries it on a fallback model inside the same call.
 
-### Token budget per image
+### Cost per image
 
-| Part | Tokens |
+| Path | Claude tokens |
 |---|---|
-| Image (cropped to ~950×1100) | ~1,400 |
-| System prompt + schema | ~2,000 (cached on retry) |
-| Output plan.json | ~3,000–5,000 |
-| Correction pass, if needed | text only; the image and prompt are read from cache |
+| Hybrid, passes validation | **0** (about 45 s on a 16 GB GPU) |
+| Hybrid, Claude corrects the draft | ~1,400 image + ~2,000 prompt + ~4,000 draft in, ~4,000 out |
+| `--mode vlm --provider claude` | ~1,400 image + ~2,000 prompt in, ~3,000–5,000 out |
 
 Viewing, walking, editing furniture and exporting cost nothing.
 
@@ -81,7 +105,7 @@ Walls are not stored. They are derived from room edges, so a plan can never have
 python extract/validate.py examples/2295-west/plan.json
 ```
 
-It checks overlapping rooms, doors between rooms that share no wall, rooms unreachable from the main door, rectangles that don't match their printed sizes, and the rebuilt carpet area against the brochure's figure. The example comes within 5.2% (1351 vs 1425 sft).
+It checks overlapping rooms, neighbours whose edges miss each other by a few inches (which would double the wall in 3D), doors between rooms that share no wall, rooms unreachable from the main door, rectangles that don't match their printed sizes, and the rebuilt carpet area against the brochure's figure. The example comes within 5.2% (1351 vs 1425 sft).
 
 ## Using the output in another app
 
@@ -98,12 +122,15 @@ It checks overlapping rooms, doors between rooms that share no wall, rooms unrea
 
 ```
 schema/floorplan.schema.json   the interchange format
-extract/prompt.md              instructions for the vision model
-extract/extract_plan.py        image -> plan.json (Claude or Ollama)
+extract/prompt.md              instructions for a model that reads the whole plan
+extract/extract_plan.py        image -> plan.json (hybrid, or one model via Claude or Ollama)
+extract/geometry.py            walls, grid cells, spaces and wall gaps from pixels (OpenCV, no AI)
+extract/hybrid.py              local-model labels + geometry -> rooms, doors, windows, furniture
 extract/validate.py            consistency checks, no AI
+extract/compare.py             score a plan against a reference
 builder/plan2scene.js          plan.json -> scene (metres), no dependencies
 builder/scene2three.js         scene -> three.js meshes
 builder/cli.mjs                plan.json -> scene.json from the command line
 viewer/app.js + index.html     dollhouse and walkthrough viewer
-examples/2295-west/            brochure input, crop sent to the model, plan.json, scene.json
+examples/2295-west/            brochure input, crop, hand-checked plan.json, hybrid.plan.json + debug image, scene.json
 ```

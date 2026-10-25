@@ -62,6 +62,14 @@ def validate(plan):
             if ox > TOL and oy > TOL and ox * oy > 1.0:
                 errors.append(f"rooms {a['id']} and {b['id']} overlap by {ox * oy:.1f} sqft")
 
+    # Near-miss edges: neighbours a few inches apart get two parallel walls in 3D
+    for i, a in enumerate(rl):
+        for b in rl[i + 1:]:
+            for o1, c1, s1, e1 in edges(a).values():
+                for o2, c2, s2, e2 in edges(b).values():
+                    if o1 == o2 and 0.05 < abs(c1 - c2) < 0.6 and min(e1, e2) - max(s1, s2) > 1:
+                        warnings.append(f"rooms {a['id']} and {b['id']} have edges {abs(c1 - c2):.2f} ft apart; make them share one edge")
+
     # Printed dimensions vs rectangle (centerline rect is a bit larger than clear size)
     for r in rl:
         dims = parse_dims(r["label_dims"])
