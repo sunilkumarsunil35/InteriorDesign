@@ -89,7 +89,11 @@ def ask_ollama(image_b64, model, host):
         "model": model,
         "stream": False,
         "format": SCHEMA,
-        "options": {"temperature": 0},
+        # Use an instruct (non-thinking) model: thinking models can reason for 20k+ tokens here
+        "think": False,
+        # Ollama's default context (4k on 16 GB cards) is too small for prompt + image + plan;
+        # num_predict stops a looping model instead of hanging
+        "options": {"temperature": 0, "num_ctx": 16384, "num_predict": 8192},
         "messages": [
             {"role": "system", "content": PROMPT},
             {"role": "user", "content": "Extract this floor plan.", "images": [image_b64]},
@@ -98,8 +102,13 @@ def ask_ollama(image_b64, model, host):
     req = urllib.request.Request(
         f"{host}/api/chat", data=json.dumps(body).encode(), headers={"Content-Type": "application/json"}
     )
-    with urllib.request.urlopen(req, timeout=600) as r:
-        return json.loads(json.loads(r.read())["message"]["content"])
+    with urllib.request.urlopen(req, timeout=1200) as r:
+        resp = json.loads(r.read())
+    ev, secs = resp.get("eval_count", 0), resp.get("eval_duration", 1) / 1e9
+    print(f"[ollama] {model}: prompt={resp.get('prompt_eval_count')} out={ev} tok at {ev / secs:.0f} tok/s", file=sys.stderr)
+    if resp.get("done_reason") == "length":
+        raise RuntimeError("output hit num_predict before the JSON closed; the model is probably looping")
+    return json.loads(resp["message"]["content"])
 
 
 def main():
