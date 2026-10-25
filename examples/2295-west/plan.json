@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "units": "ft",
+  "meta": {
+    "title": "2295 SFT - WEST FACING",
+    "bhk": "3 BHK",
+    "facing": "west",
+    "total_area_sqft": 2295,
+    "carpet_area_sqft": 1425,
+    "balcony_area_sqft": 228,
+    "north_deg": 0,
+    "notes": "Reference output, hand-checked. Wall lines measured from the brochure image at about 8.6 px/ft. Closet rectangle includes the dressing counter above it."
+  },
+  "defaults": {
+    "wall_height_ft": 10,
+    "ext_wall_thickness_ft": 0.75,
+    "int_wall_thickness_ft": 0.5,
+    "door_height_ft": 7
+  },
+  "rooms": [
+    { "id": "bed2", "type": "bedroom", "label": "BED ROOM-02", "label_dims": "12'0\"x13'0\"", "x": 0, "y": 0, "w": 12.5, "d": 13.75 },
+    { "id": "t2", "type": "toilet", "label": "TOILET-02", "label_dims": "5'0\"x9'0\"", "x": 12.5, "y": 0, "w": 5.5, "d": 9.25 },
+    { "id": "t3", "type": "toilet", "label": "TOILET-03", "label_dims": "5'0\"x9'0\"", "x": 18, "y": 0, "w": 5.75, "d": 9.25 },
+    { "id": "bed3", "type": "bedroom", "label": "BED ROOM-03", "label_dims": "11'8\"x13'0\"", "x": 23.75, "y": 0, "w": 11.75, "d": 13.75 },
+    { "id": "balcony", "type": "balcony", "label": "4'6\" WIDE BALCONY", "label_dims": "", "x": 35.5, "y": 0, "w": 5.75, "d": 13.75 },
+    { "id": "passage", "type": "passage", "label": "", "label_dims": "", "x": 12.5, "y": 9.25, "w": 5.5, "d": 4.5 },
+    { "id": "pooja", "type": "pooja", "label": "POOJA", "label_dims": "5'0\"x4'4\"", "x": 18, "y": 9.25, "w": 5.75, "d": 4.5 },
+    { "id": "drawing", "type": "drawing", "label": "DRAWING", "label_dims": "12'4\"x12'0\"", "x": 0, "y": 13.75, "w": 12.5, "d": 12.5 },
+    { "id": "dining", "type": "dining", "label": "DINING", "label_dims": "10'8\"x17'0\"", "x": 12.5, "y": 13.75, "w": 11.25, "d": 17.25 },
+    { "id": "living", "type": "living", "label": "LIVING", "label_dims": "10'5\"x12'0\"", "x": 23.75, "y": 13.75, "w": 11, "d": 12.5 },
+    { "id": "sitout", "type": "sitout", "label": "SIT-OUT", "label_dims": "6'0\"x11'8\"", "x": 34.75, "y": 13.75, "w": 6.5, "d": 12.5 },
+    { "id": "mbed", "type": "master_bedroom", "label": "M.BED ROOM", "label_dims": "12'0\"x15'0\"", "x": 0, "y": 26.25, "w": 12.5, "d": 15.75 },
+    { "id": "closet", "type": "closet", "label": "CLOSET", "label_dims": "4'10\"x8'4\"", "x": 12.5, "y": 31, "w": 5.25, "d": 11 },
+    { "id": "t1", "type": "toilet", "label": "TOILET-01", "label_dims": "5'6\"x10'0\"", "x": 17.75, "y": 31, "w": 6, "d": 11 },
+    { "id": "kitchen", "type": "kitchen", "label": "KITCHEN", "label_dims": "11'4\"x15'0\"", "x": 23.75, "y": 26.25, "w": 11.75, "d": 15.75 },
+    { "id": "utility", "type": "utility", "label": "4'6\" WIDE UTILITY", "label_dims": "", "x": 35.5, "y": 26.25, "w": 5.75, "d": 15.75 }
+  ],
+  "doors": [
+    { "id": "main", "from": "drawing", "to": "outside", "kind": "hinged", "width_ft": 3.5, "pos": 0.27, "side": "left", "main": true },
+    { "id": "bed2_passage", "from": "bed2", "to": "passage", "kind": "hinged", "width_ft": 3, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "bed2_t2", "from": "bed2", "to": "t2", "kind": "hinged", "width_ft": 2.5, "pos": 0.55, "side": "auto", "main": false },
+    { "id": "bed3_t3", "from": "bed3", "to": "t3", "kind": "hinged", "width_ft": 2.5, "pos": 0.55, "side": "auto", "main": false },
+    { "id": "bed3_living", "from": "bed3", "to": "living", "kind": "hinged", "width_ft": 3, "pos": 0.15, "side": "auto", "main": false },
+    { "id": "bed3_balcony", "from": "bed3", "to": "balcony", "kind": "hinged", "width_ft": 3, "pos": 0.8, "side": "auto", "main": false },
+    { "id": "passage_dining", "from": "passage", "to": "dining", "kind": "opening", "width_ft": 0, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "pooja_dining", "from": "pooja", "to": "dining", "kind": "opening", "width_ft": 4, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "drawing_dining", "from": "drawing", "to": "dining", "kind": "opening", "width_ft": 0, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "living_dining", "from": "living", "to": "dining", "kind": "opening", "width_ft": 0, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "living_sitout", "from": "living", "to": "sitout", "kind": "french", "width_ft": 6, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "mbed_dining", "from": "mbed", "to": "dining", "kind": "hinged", "width_ft": 3, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "mbed_closet", "from": "mbed", "to": "closet", "kind": "opening", "width_ft": 2.5, "pos": 0.3, "side": "auto", "main": false },
+    { "id": "closet_t1", "from": "closet", "to": "t1", "kind": "hinged", "width_ft": 2.5, "pos": 0.45, "side": "auto", "main": false },
+    { "id": "dining_kitchen", "from": "dining", "to": "kitchen", "kind": "opening", "width_ft": 0, "pos": 0.5, "side": "auto", "main": false },
+    { "id": "kitchen_utility", "from": "kitchen", "to": "utility", "kind": "hinged", "width_ft": 2.75, "pos": 0.2, "side": "auto", "main": false }
+  ],
+  "windows": [
+    { "id": "w_bed2", "room": "bed2", "side": "top", "kind": "window", "width_ft": 5, "pos": 0.6 },
+    { "id": "w_t2", "room": "t2", "side": "top", "kind": "ventilator", "width_ft": 2, "pos": 0.5 },
+    { "id": "w_t3", "room": "t3", "side": "top", "kind": "ventilator", "width_ft": 2, "pos": 0.5 },
+    { "id": "w_bed3", "room": "bed3", "side": "top", "kind": "window", "width_ft": 5, "pos": 0.45 },
+    { "id": "w_drawing", "room": "drawing", "side": "left", "kind": "window", "width_ft": 4, "pos": 0.75 },
+    { "id": "w_mbed_left", "room": "mbed", "side": "left", "kind": "window", "width_ft": 3, "pos": 0.18 },
+    { "id": "w_mbed", "room": "mbed", "side": "bottom", "kind": "window", "width_ft": 5, "pos": 0.5 },
+    { "id": "w_t1", "room": "t1", "side": "bottom", "kind": "ventilator", "width_ft": 2, "pos": 0.5 },
+    { "id": "w_kitchen", "room": "kitchen", "side": "bottom", "kind": "window", "width_ft": 4, "pos": 0.45 }
+  ],
+  "furniture": [
+    { "type": "bed_double", "room": "bed2", "cx": 3.75, "cy": 5.5, "w": 6.75, "d": 6, "rot": 90 },
+    { "type": "side_table", "room": "bed2", "cx": 0.9, "cy": 1.6, "w": 1.5, "d": 1.5, "rot": 90 },
+    { "type": "armchair", "room": "bed2", "cx": 10.5, "cy": 1.75, "w": 2.5, "d": 2.5, "rot": 0 },
+    { "type": "wardrobe", "room": "bed2", "cx": 4.5, "cy": 12.5, "w": 7, "d": 2, "rot": 180 },
+
+    { "type": "bed_double", "room": "bed3", "cx": 31.75, "cy": 5.5, "w": 6.75, "d": 6, "rot": 270 },
+    { "type": "side_table", "room": "bed3", "cx": 34.6, "cy": 1.6, "w": 1.5, "d": 1.5, "rot": 270 },
+    { "type": "armchair", "room": "bed3", "cx": 25.25, "cy": 1.75, "w": 2.5, "d": 2.5, "rot": 0 },
+    { "type": "wardrobe", "room": "bed3", "cx": 31, "cy": 12.5, "w": 7, "d": 2, "rot": 180 },
+
+    { "type": "wc", "room": "t2", "cx": 15.25, "cy": 1.5, "w": 1.5, "d": 2.25, "rot": 0 },
+    { "type": "washbasin", "room": "t2", "cx": 15.25, "cy": 7.75, "w": 1.75, "d": 1.5, "rot": 180 },
+    { "type": "wc", "room": "t3", "cx": 20.9, "cy": 1.5, "w": 1.5, "d": 2.25, "rot": 0 },
+    { "type": "washbasin", "room": "t3", "cx": 20.9, "cy": 7.75, "w": 1.75, "d": 1.5, "rot": 180 },
+
+    { "type": "pooja_unit", "room": "pooja", "cx": 20.9, "cy": 10.25, "w": 4, "d": 1.5, "rot": 0 },
+
+    { "type": "tv_unit", "room": "drawing", "cx": 6.5, "cy": 14.5, "w": 5, "d": 1.25, "rot": 0 },
+    { "type": "sofa", "room": "drawing", "cx": 6, "cy": 24.75, "w": 7, "d": 2.75, "rot": 180 },
+    { "type": "sofa", "room": "drawing", "cx": 1.75, "cy": 19.75, "w": 2.75, "d": 5, "rot": 90 },
+    { "type": "armchair", "room": "drawing", "cx": 11, "cy": 17.5, "w": 2.25, "d": 2.25, "rot": 270 },
+    { "type": "armchair", "room": "drawing", "cx": 11, "cy": 20.25, "w": 2.25, "d": 2.25, "rot": 270 },
+    { "type": "coffee_table", "room": "drawing", "cx": 6.25, "cy": 19.75, "w": 3.5, "d": 2, "rot": 0 },
+
+    { "type": "dining_table", "room": "dining", "cx": 18.1, "cy": 20.5, "w": 3.25, "d": 6.5, "rot": 0 },
+
+    { "type": "tv_unit", "room": "living", "cx": 30.5, "cy": 14.5, "w": 5, "d": 1.25, "rot": 0 },
+    { "type": "sofa", "room": "living", "cx": 28.75, "cy": 24.75, "w": 7, "d": 2.75, "rot": 180 },
+    { "type": "coffee_table", "room": "living", "cx": 28.5, "cy": 20, "w": 3.5, "d": 2, "rot": 0 },
+    { "type": "armchair", "room": "living", "cx": 33, "cy": 20, "w": 2.5, "d": 2.5, "rot": 270 },
+
+    { "type": "plant", "room": "sitout", "cx": 40, "cy": 15, "w": 1.5, "d": 1.5, "rot": 0 },
+    { "type": "plant", "room": "sitout", "cx": 40, "cy": 25, "w": 1.5, "d": 1.5, "rot": 0 },
+    { "type": "plant", "room": "balcony", "cx": 40, "cy": 1.5, "w": 1.5, "d": 1.5, "rot": 0 },
+
+    { "type": "bed_double", "room": "mbed", "cx": 3.75, "cy": 36, "w": 6.75, "d": 6, "rot": 90 },
+    { "type": "side_table", "room": "mbed", "cx": 0.9, "cy": 32.25, "w": 1.5, "d": 1.5, "rot": 90 },
+    { "type": "side_table", "room": "mbed", "cx": 0.9, "cy": 39.75, "w": 1.5, "d": 1.5, "rot": 90 },
+    { "type": "armchair", "room": "mbed", "cx": 2.75, "cy": 28.25, "w": 2.25, "d": 2.25, "rot": 0 },
+    { "type": "armchair", "room": "mbed", "cx": 6.25, "cy": 28.25, "w": 2.25, "d": 2.25, "rot": 0 },
+
+    { "type": "wardrobe", "room": "closet", "cx": 13.5, "cy": 37.5, "w": 1.75, "d": 7.5, "rot": 90 },
+    { "type": "wc", "room": "t1", "cx": 20.75, "cy": 40.6, "w": 1.5, "d": 2.25, "rot": 180 },
+    { "type": "washbasin", "room": "t1", "cx": 23, "cy": 36, "w": 1.5, "d": 1.75, "rot": 270 },
+    { "type": "shower", "room": "t1", "cx": 20.75, "cy": 32.75, "w": 5, "d": 3, "rot": 0 },
+
+    { "type": "fridge", "room": "kitchen", "cx": 25.25, "cy": 32.5, "w": 2.25, "d": 2.5, "rot": 90 },
+    { "type": "kitchen_counter", "room": "kitchen", "cx": 34.25, "cy": 34.5, "w": 2, "d": 11, "rot": 270 },
+    { "type": "stove", "room": "kitchen", "cx": 34.25, "cy": 33.5, "w": 2, "d": 2.5, "rot": 270 },
+    { "type": "kitchen_counter", "room": "kitchen", "cx": 29.25, "cy": 40.75, "w": 8.5, "d": 2, "rot": 180 },
+    { "type": "sink", "room": "kitchen", "cx": 29.25, "cy": 40.75, "w": 2.5, "d": 2, "rot": 180 },
+
+    { "type": "washing_machine", "room": "utility", "cx": 37, "cy": 27.5, "w": 2, "d": 2, "rot": 0 },
+    { "type": "dishwasher", "room": "utility", "cx": 39.5, "cy": 27.5, "w": 2, "d": 2, "rot": 0 }
+  ]
+}

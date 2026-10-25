@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FloorPlan",
+  "description": "Interchange format for a 2D floor plan. Units are feet. Origin is the top-left corner of the plan as drawn; x grows right, y grows down. Room rectangles are measured to wall centerlines, so neighbouring rooms share edges exactly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "units", "meta", "defaults", "rooms", "doors", "windows", "furniture"],
+  "properties": {
+    "schema_version": { "type": "string", "enum": ["1.0"] },
+    "units": { "type": "string", "enum": ["ft"] },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "bhk", "facing", "total_area_sqft", "carpet_area_sqft", "balcony_area_sqft", "north_deg", "notes"],
+      "properties": {
+        "title": { "type": "string", "description": "Heading printed on the plan, e.g. '2295 SFT - WEST FACING'." },
+        "bhk": { "type": "string", "description": "e.g. '3 BHK'. Empty string if not printed." },
+        "facing": { "type": "string", "enum": ["north", "south", "east", "west", "north-east", "north-west", "south-east", "south-west", "unknown"] },
+        "total_area_sqft": { "type": "number", "description": "0 if not printed." },
+        "carpet_area_sqft": { "type": "number", "description": "0 if not printed." },
+        "balcony_area_sqft": { "type": "number", "description": "0 if not printed." },
+        "north_deg": { "type": "number", "description": "Clockwise angle from 'up' on the drawing to true north. 0 if north is up or unknown." },
+        "notes": { "type": "string", "description": "Anything ambiguous the extractor wants a human to check. Empty string if none." }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wall_height_ft", "ext_wall_thickness_ft", "int_wall_thickness_ft", "door_height_ft"],
+      "properties": {
+        "wall_height_ft": { "type": "number" },
+        "ext_wall_thickness_ft": { "type": "number" },
+        "int_wall_thickness_ft": { "type": "number" },
+        "door_height_ft": { "type": "number" }
+      }
+    },
+    "rooms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "label", "label_dims", "x", "y", "w", "d"],
+        "properties": {
+          "id": { "type": "string", "description": "Short unique id, e.g. 'bed2', 'kitchen'." },
+          "type": {
+            "type": "string",
+            "enum": ["living", "drawing", "dining", "kitchen", "bedroom", "master_bedroom", "toilet", "closet", "pooja", "utility", "balcony", "sitout", "passage", "foyer", "study", "store", "terrace", "other"]
+          },
+          "label": { "type": "string", "description": "Room name exactly as printed." },
+          "label_dims": { "type": "string", "description": "Dimension text exactly as printed, e.g. 12'0\"x13'0\". Empty string if none." },
+          "x": { "type": "number", "description": "Left edge (ft)." },
+          "y": { "type": "number", "description": "Top edge (ft)." },
+          "w": { "type": "number", "description": "Width along x (ft)." },
+          "d": { "type": "number", "description": "Depth along y (ft)." }
+        }
+      }
+    },
+    "doors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "from", "to", "kind", "width_ft", "pos", "side", "main"],
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "string", "description": "Room id." },
+          "to": { "type": "string", "description": "Room id, or 'outside' for the main door / exterior doors." },
+          "kind": { "type": "string", "enum": ["hinged", "sliding", "french", "opening"], "description": "'opening' = doorless gap or open-plan connection." },
+          "width_ft": { "type": "number", "description": "Clear width. 0 = the full length of the shared edge (open plan)." },
+          "pos": { "type": "number", "description": "Centre of the door along the shared edge, 0 = top/left end, 1 = bottom/right end." },
+          "side": { "type": "string", "enum": ["top", "bottom", "left", "right", "auto"], "description": "Which edge of 'from' the door is on. Use 'auto' when 'to' is a room; required when 'to' is 'outside'." },
+          "main": { "type": "boolean", "description": "True for the flat's main entrance (usually marked with an arrow)." }
+        }
+      }
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "room", "side", "kind", "width_ft", "pos"],
+        "properties": {
+          "id": { "type": "string" },
+          "room": { "type": "string" },
+          "side": { "type": "string", "enum": ["top", "bottom", "left", "right"] },
+          "kind": { "type": "string", "enum": ["window", "ventilator", "bay"] },
+          "width_ft": { "type": "number" },
+          "pos": { "type": "number", "description": "Centre along that edge, 0 = top/left end, 1 = bottom/right end." }
+        }
+      }
+    },
+    "furniture": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "room", "cx", "cy", "w", "d", "rot"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["bed_double", "bed_single", "wardrobe", "sofa", "armchair", "coffee_table", "side_table", "tv_unit", "dining_table", "study_table", "bookshelf", "kitchen_counter", "stove", "sink", "fridge", "wc", "washbasin", "shower", "washing_machine", "dishwasher", "pooja_unit", "plant"]
+          },
+          "room": { "type": "string" },
+          "cx": { "type": "number", "description": "Centre x (ft)." },
+          "cy": { "type": "number", "description": "Centre y (ft)." },
+          "w": { "type": "number", "description": "Footprint along x as drawn (ft)." },
+          "d": { "type": "number", "description": "Footprint along y as drawn (ft)." },
+          "rot": { "type": "number", "enum": [0, 90, 180, 270], "description": "Direction the front faces: 0 = down, 90 = right, 180 = up, 270 = left. A bed's front is its foot end; a sofa's front is where you sit." }
+        }
+      }
+    }
+  }
+}
